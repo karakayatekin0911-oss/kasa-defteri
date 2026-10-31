@@ -160,7 +160,6 @@ button { cursor: pointer; }
 }
 .sticky textarea::placeholder { color: var(--ink-soft); opacity: .7; }
 .sticky textarea:focus { outline: none; }
-@media (max-width: 560px) { .side-col { width: 100%; } }
 @media (min-width: 700px) {
   /* Sağ sütun tarih, hatırlatma ve gezinme satırlarının yanında durur; defter hemen altlarından başlar */
   #viewDay { display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: auto auto 1fr; column-gap: 20px; }
@@ -283,18 +282,6 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .carry-note { margin: 0; text-align: right; font: 600 1.3rem var(--font-hand); color: var(--ink-soft); }
 .hint { margin: 0; font-size: .82rem; color: var(--ink-soft); }
 
-.entry {
-  display: grid; gap: 8px; align-items: end;
-  grid-template-columns: minmax(0, 1fr) 8rem 8rem auto auto;
-  border-top: 1px dashed var(--rule); padding-top: 14px;
-}
-.entry h3 { grid-column: 1 / -1; margin: 0; font: 700 1.35rem var(--font-hand); }
-.entry .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-@media (max-width: 640px) {
-  .entry { grid-template-columns: 1fr 1fr; }
-  .entry .f-desc, .entry .f-pay, .entry .actions { grid-column: 1 / -1; }
-  .entry .actions .btn { flex: 1 1 auto; }
-}
 .field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .field label { font-size: .75rem; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
 .field input { width: 100%; }
@@ -317,18 +304,16 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
   padding: 2px 8px; font: 700 .72rem var(--font-ui); line-height: 1.4;
 }
 .ledger .mini.ghost { background: transparent; color: var(--ink); }
-.desc-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.desc-wrap input.cell { flex: 1 1 auto; }
-.pay-pick { display: inline-flex; gap: 3px; flex: none; }
-.pay-btn, .ledger .mini.pay-btn { border: 0; border-radius: 5px; color: var(--paper); font: 700 .72rem var(--font-ui); line-height: 1.4; padding: 3px 8px; }
-.pay-btn.on, .ledger .mini.pay-btn.on { background: var(--in); }
-.pay-btn.off, .ledger .mini.pay-btn.off { background: var(--out); }
-.pay-pick.big { gap: 4px; }
-.pay-pick.big .pay-btn { font-size: .9rem; padding: 7px 14px; flex: 1 1 auto; }
-.entry .f-pay .pay-pick { display: flex; }
-.pay-tag { font: 700 .62rem var(--font-ui); text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); white-space: nowrap; }
-.pay-tag.kart { color: var(--focus); }
-.ledger tfoot tr.split td { height: 32px; font-weight: 600; }
+/* Nakit Kasa ve Banka: ayrı hesaplar, güncel tutarlarıyla */
+.acct-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.acct-switch button {
+  border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink-soft); border-radius: 8px;
+  padding: 7px 10px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0 8px; font-weight: 700; text-align: left;
+}
+.acct-switch button b { font: 600 .95rem var(--font-num); }
+.acct-switch button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.sm { display: none; }
+.fx-item { display: contents; }
 .sum-split { margin: 0; text-align: right; font-weight: 700; }
 .print-only { display: none; }
 
@@ -341,7 +326,7 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff; }
   .app { max-width: none; padding: 0 !important; }
-  .tabs, .banner, .daynav, .notes, .info, .wx-box, .pray-box, .hint, .entry, .stopwatch, .toast, .clock, .filters, .print-btn, tr.write, tr.edit-actions { display: none !important; }
+  .tabs, .acct-switch, .banner, .daynav, .notes, .info, .wx-box, .pray-box, .hint, .entry, .stopwatch, .toast, .clock, .filters, .print-btn, tr.write, tr.edit-actions { display: none !important; }
   .paper { box-shadow: none; padding: 0; }
   .ledger tr { break-inside: avoid; }
   .print-only { display: block; }
@@ -355,7 +340,6 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 @media (max-width: 560px) {
   .ledger td.c-num input.cell { width: 4.9em; }
   .ledger .mini { padding: 2px 5px; font-size: .66rem; }
-  .desc-wrap { flex-direction: column; align-items: flex-start; gap: 2px; }
 }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
@@ -383,6 +367,29 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   .toast { animation: rise .2s ease-out; }
   @keyframes rise { from { transform: translate(-50%, 8px); opacity: 0; } }
 }
+@media (max-width: 560px) {
+  .side-col { width: 100%; gap: 6px; }
+  /* Gezinme tek satırda */
+  .daynav { flex-wrap: nowrap; gap: 4px; }
+  .daynav .btn { flex: none; padding: 7px 9px; white-space: nowrap; }
+  .daynav #dayPicker { flex: 1 1 0; width: 0; min-width: 0; padding: 6px 4px; font-size: .85rem; }
+  .lg { display: none; }
+  .sm { display: inline; }
+  /* Hava, döviz ve not küçük */
+  .info { padding: 5px 8px; gap: 3px; font-size: .78rem; }
+  .wx-box { margin: 0; gap: 3px; font-size: .8rem; }
+  .wx-box .wx br { display: none; }
+  .wx-now { padding: 0 6px; margin: 0 0 0 4px; }
+  .wx-box .temp { font-size: .85rem; }
+  .info .fx { grid-template-columns: 1fr 1fr; gap: 1px 12px; padding-top: 3px; }
+  .fx-item { display: flex; justify-content: space-between; gap: 4px; white-space: nowrap; }
+  .info .fx .val { font-size: .76rem; }
+  .info .fx .chg, .fx-item .lg { display: none; }
+  .sticky { padding: 3px 8px 4px; }
+  .sticky label { font-size: .95rem; line-height: 1.1; }
+  .sticky textarea { min-height: 34px; font-size: .85rem; line-height: 1.25; }
+  .acct-switch button { padding: 5px 8px; font-size: .85rem; flex-direction: column; gap: 0; }
+}
 </style>
 
 </head>
@@ -409,12 +416,18 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     <p><strong>Kayıtlar bu tarayıcıda saklanamıyor.</strong> Gizli pencere kullanıyor olabilirsiniz. Sayfayı kapatırsanız girdiğiniz kayıtlar kaybolur.</p>
   </div>
 
+  <div class="acct-switch" id="acctSwitch" role="group" aria-label="Hesap">
+    <button type="button" data-acct="nakit"><span>Nakit Kasa</span><b id="acctNakit"></b></button>
+    <button type="button" data-acct="kart"><span>Banka</span><b id="acctKart"></b></button>
+  </div>
+
   <!-- Günlük sayfa -->
   <section id="viewDay" class="paper" role="tabpanel" aria-labelledby="tabDay">
     <div class="sheet-head">
       <div class="title-wrap">
         <h2 class="day-title" id="dayTitle">—</h2>
         <div class="clock-line"><span class="clock" id="clock" aria-label="Şu anki saat">--:--:--</span><span class="page-no" id="pageNo"></span></div>
+        <p class="print-only" id="acctPrint"></p>
         <section class="pray-box" id="prayLine" aria-label="Namaz vakitleri" hidden>
           <div id="prayContent"></div>
           <div class="pray-pick" id="prayPick" hidden>
@@ -446,17 +459,17 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     <section class="notes" id="dayNotes" aria-label="Bu günün hatırlatmaları"></section>
 
     <div class="daynav">
-      <button type="button" class="btn" id="prevDay" aria-label="Önceki gün">‹ Önceki</button>
+      <button type="button" class="btn" id="prevDay" aria-label="Önceki gün">‹<span class="lg"> Önceki</span></button>
       <input type="date" id="dayPicker" aria-label="Tarih seç">
-      <button type="button" class="btn" id="nextDay" aria-label="Sonraki gün">Sonraki ›</button>
+      <button type="button" class="btn" id="nextDay" aria-label="Sonraki gün"><span class="lg">Sonraki </span>›</button>
       <button type="button" class="btn quiet" id="todayBtn">Bugün</button>
-      <button type="button" class="btn print-btn" id="printDay">PDF kaydet / yazdır</button>
+      <button type="button" class="btn print-btn" id="printDay"><span class="lg">PDF kaydet / yazdır</span><span class="sm">PDF</span></button>
     </div>
 
     <div class="banner" id="openingPrompt" hidden>
-      <p>Kasada şu an para varsa tutarını yazın; ilk sayfanın <strong>Devir</strong> satırına geçer.</p>
+      <p>Bu hesapta şu an para varsa tutarını yazın; ilk sayfanın <strong>Devir</strong> satırına geçer.</p>
       <div class="row">
-        <div class="field"><label for="openingQuick">Kasadaki para (₺)</label><input id="openingQuick" class="num" inputmode="decimal" autocomplete="off" placeholder="0,00"></div>
+        <div class="field"><label for="openingQuick" id="openingQuickLabel">Tutar (₺)</label><input id="openingQuick" class="num" inputmode="decimal" autocomplete="off" placeholder="0,00"></div>
         <button type="button" class="btn primary" id="saveOpeningQuick">Kaydet</button>
       </div>
     </div>
@@ -471,40 +484,15 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       </table>
     </div>
     <p class="carry-note" id="carryNote"></p>
-    <p class="hint">Yeni kaydı ilk boş satıra ya da aşağıdaki kutulara yazın, Enter’a basın; deftere geçer. Bir kaydı düzeltmek ya da silmek için üstüne dokunun.</p>
+    <p class="hint">Yeni kaydı ilk boş satıra yazın, Enter’a basın; deftere geçer. Bir kaydı düzeltmek ya da silmek için üstüne dokunun.</p>
 
-    <form class="entry" id="entryForm" novalidate>
-      <h3>Yeni kayıt</h3>
-      <div class="field f-desc">
-        <label for="entryDesc">Açıklama</label>
-        <input id="entryDesc" autocomplete="off" maxlength="120" placeholder="Örn. Peşin satış, kira, fatura">
-      </div>
-      <div class="field">
-        <label for="entryIn">Gelir (₺)</label>
-        <input id="entryIn" class="num" inputmode="decimal" autocomplete="off" placeholder="0,00">
-      </div>
-      <div class="field">
-        <label for="entryOut">Gider (₺)</label>
-        <input id="entryOut" class="num" inputmode="decimal" autocomplete="off" placeholder="0,00">
-      </div>
-      <div class="field f-pay">
-        <label id="entryPayLabel">Ödeme</label>
-        <span class="pay-pick big" id="entryPay" role="group" aria-labelledby="entryPayLabel" data-pay="nakit">
-          <button type="button" class="pay-btn on" data-val="nakit" aria-pressed="true">Nakit</button>
-          <button type="button" class="pay-btn off" data-val="kart" aria-pressed="false">Kart</button>
-        </span>
-      </div>
-      <div class="actions">
-        <button type="submit" class="btn primary">Ekle</button>
-      </div>
-    </form>
   </section>
 
   <!-- Defter özeti -->
   <section id="viewSummary" class="paper" role="tabpanel" aria-labelledby="tabSummary" hidden>
     <div class="sheet-head">
       <h2 class="day-title">Defter Özeti <span class="print-only" id="sumPeriod"></span></h2>
-      <button type="button" class="btn print-btn" id="printSummary">PDF kaydet / yazdır</button>
+      <button type="button" class="btn print-btn" id="printSummary"><span class="lg">PDF kaydet / yazdır</span><span class="sm">PDF</span></button>
       <div class="filters field">
         <label for="monthFilter">Dönem</label>
         <select id="monthFilter"></select>
@@ -542,9 +530,10 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     </section>
     <section>
       <h3>Açılış bakiyesi</h3>
-      <p>Deftere başladığınız gün kasada olan para. İlk sayfanın “Devir” satırına bu tutar yazılır.</p>
+      <p>Deftere başladığınız gün her hesapta olan para. İlk sayfanın “Devir” satırına bu tutar yazılır.</p>
       <div class="row">
-        <div class="field"><label for="openingInput">Tutar (₺)</label><input id="openingInput" class="num" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="openingInput">Nakit kasa (₺)</label><input id="openingInput" class="num" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="openingBankInput">Banka (₺)</label><input id="openingBankInput" class="num" inputmode="decimal" autocomplete="off"></div>
         <button type="button" class="btn primary" id="saveOpening">Kaydet</button>
       </div>
     </section>
@@ -592,7 +581,8 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   var editingId = null;
   var draft = { desc: "", gelir: "", gider: "" }; // boş satıra yazılmakta olan kayıt
   var renderSeq = 0;
-  var lastPay = "nakit"; // yeni satırda son seçilen ödeme türü
+  var ACCT_KEY = "kasaDefteri.hesap";
+  var account = "nakit"; // açık hesap: "nakit" (Nakit Kasa) ya da "kart" (Banka; eski kart kayıtları da burada)
 
   /* ---------- tarih yardımcıları ---------- */
   function pad(n) { return (n < 10 ? "0" : "") + n; }
@@ -629,11 +619,12 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   }
 
   /* ---------- kayıt ---------- */
-  function emptyState() { return { version: 1, opening: 0, entries: [], sample: false }; }
+  function emptyState() { return { version: 1, opening: 0, openingBanka: 0, entries: [], sample: false }; }
   function valid(s) { return s && typeof s === "object" && Array.isArray(s.entries); }
   function normalize(s) {
     var out = emptyState();
     out.opening = Math.round(+s.opening || 0);
+    out.openingBanka = Math.round(+s.openingBanka || 0);
     out.sample = !!s.sample;
     out.entries = s.entries.filter(function (e) {
       return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date);
@@ -666,7 +657,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     var t = todayISO(), d1 = addDays(t, -1), d2 = addDays(t, -2), n = 0;
     function e(date, desc, gelir, gider, odeme) { return { id: uid(), date: date, desc: desc, gelir: gelir, gider: gider, odeme: odeme || "nakit", t: ++n }; }
     return {
-      version: 1, opening: 150000, sample: true,
+      version: 1, opening: 150000, openingBanka: 0, sample: true,
       entries: [
         e(d2, "Peşin satış", 235000, 0),
         e(d2, "Market alışverişi", 0, 64050),
@@ -683,20 +674,23 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   function sorted() {
     return state.entries.slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : a.t - b.t; });
   }
+  function openingOf(a) { return a === "kart" ? state.openingBanka : state.opening; }
+  function inAccount(e) { return e.odeme === account; }
+  // Açık hesabın o güne kadarki bakiyesi
   function devirFor(date) {
-    var b = state.opening;
-    state.entries.forEach(function (e) { if (e.date < date) b += e.gelir - e.gider; });
+    var b = openingOf(account);
+    state.entries.forEach(function (e) { if (inAccount(e) && e.date < date) b += e.gelir - e.gider; });
     return b;
   }
-  // O günün sonunda nakit ve kart/banka bakiyesi. Açılış bakiyesi kasadaki nakit sayılır.
+  // O günün sonunda iki hesabın bakiyesi
   function cashSplit(date) {
-    var s = { nakit: state.opening, kart: 0 };
-    state.entries.forEach(function (e) { if (e.date <= date) s[e.odeme === "kart" ? "kart" : "nakit"] += e.gelir - e.gider; });
+    var s = { nakit: state.opening, kart: state.openingBanka };
+    state.entries.forEach(function (e) { if (e.date <= date) s[e.odeme] += e.gelir - e.gider; });
     return s;
   }
   function dayList() {
     var seen = {};
-    state.entries.forEach(function (e) { seen[e.date] = 1; });
+    state.entries.forEach(function (e) { if (inAccount(e)) seen[e.date] = 1; });
     return Object.keys(seen).sort();
   }
   function prevDayWithEntries(date) {
@@ -712,25 +706,11 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   function bal(k) { return '<td class="c-num c-bal' + (k < 0 ? " out" : "") + '">' + fmt(k) + "</td>"; }
   function num(k, cls) { return '<td class="c-num ' + (cls || "") + '">' + (k ? fmt(k) : "") + "</td>"; }
   // Kâğıdın satırına doğrudan yazılan giriş satırı ("new": boş satır, "edit": düzeltilen kayıt)
-  function payLabel(p) { return p === "kart" ? "Kart" : "Nakit"; }
-  // Yan yana Nakit / Kart düğmeleri: seçili olan yeşil, diğeri kırmızı
-  function payPick(pay) {
-    return '<span class="pay-pick" role="group" aria-label="Ödeme türü" data-pay="' + pay + '">' + ["nakit", "kart"].map(function (p) {
-      return '<button type="button" class="mini pay-btn ' + (p === pay ? "on" : "off") + '" data-act="pay" data-val="' + p + '" aria-pressed="' + (p === pay) + '">' + payLabel(p) + "</button>";
-    }).join("") + "</span>";
-  }
-  function setPay(pick, pay) {
-    pick.setAttribute("data-pay", pay);
-    pick.querySelectorAll(".pay-btn").forEach(function (b) {
-      var on = b.getAttribute("data-val") === pay;
-      b.classList.toggle("on", on); b.classList.toggle("off", !on); b.setAttribute("aria-pressed", String(on));
-    });
-  }
-  function writeRow(group, date, desc, gin, gout, lastCell, pay) {
+  function payLabel(p) { return p === "kart" ? "Banka" : "Nakit Kasa"; }
+  function writeRow(group, date, desc, gin, gout, lastCell) {
     return '<tr class="write' + (group === "edit" ? " rec editing" : "") + '" data-group="' + group + '">' + dateCell(date) +
-      '<td class="c-desc"><div class="desc-wrap"><input class="cell" data-f="desc" maxlength="120" autocomplete="off" aria-label="Açıklama" placeholder="' +
-        (group === "new" ? "Açıklama yazın…" : "") + '" value="' + esc(desc || "") + '">' +
-        payPick(pay) + "</div></td>" +
+      '<td class="c-desc"><input class="cell" data-f="desc" maxlength="120" autocomplete="off" aria-label="Açıklama" placeholder="' +
+        (group === "new" ? "Açıklama yazın…" : "") + '" value="' + esc(desc || "") + '"></td>' +
       '<td class="c-num in"><input class="cell" data-f="gelir" inputmode="decimal" autocomplete="off" aria-label="Gelir" placeholder="0,00" value="' + esc(gin || "") + '"></td>' +
       '<td class="c-num out"><input class="cell" data-f="gider" inputmode="decimal" autocomplete="off" aria-label="Gider" placeholder="0,00" value="' + esc(gout || "") + '"></td>' +
       lastCell + "</tr>";
@@ -739,7 +719,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   function renderDay() {
     renderSeq++;
     var date = current;
-    var entries = sorted().filter(function (e) { return e.date === date; });
+    var entries = sorted().filter(function (e) { return inAccount(e) && e.date === date; });
     var devir = devirFor(date);
     var from = prevDayWithEntries(date);
     var days = dayList();
@@ -758,7 +738,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     entries.forEach(function (e) {
       gIn += e.gelir; gOut += e.gider; running += e.gelir - e.gider;
       if (e.id === editingId) {
-        html += writeRow("edit", e.date, e.desc, e.gelir ? fmt(e.gelir) : "", e.gider ? fmt(e.gider) : "", bal(running), e.odeme) +
+        html += writeRow("edit", e.date, e.desc, e.gelir ? fmt(e.gelir) : "", e.gider ? fmt(e.gider) : "", bal(running)) +
           '<tr class="edit-actions" data-group="edit"><td class="c-date"></td><td colspan="4"><div>' +
           '<button type="button" class="mini" data-act="save">Kaydet</button>' +
           '<button type="button" class="mini ghost" data-act="cancel">Vazgeç</button>' +
@@ -766,27 +746,25 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
         return;
       }
       html += '<tr class="rec" tabindex="0" data-id="' + e.id + '" aria-label="' + esc(e.desc) + ', düzeltmek için seçin">' +
-        dateCell(e.date) + '<td class="c-desc">' + esc(e.desc) + ' <span class="pay-tag ' + e.odeme + '">' + payLabel(e.odeme) + "</span></td>" + num(e.gelir, "in") + num(e.gider, "out") + bal(running) + "</tr>";
+        dateCell(e.date) + '<td class="c-desc">' + esc(e.desc) + "</td>" + num(e.gelir, "in") + num(e.gider, "out") + bal(running) + "</tr>";
     });
     if (!editingId) {
       html += writeRow("new", date, draft.desc, draft.gelir, draft.gider,
-        '<td class="c-num c-bal"><button type="button" class="mini" data-act="add">Ekle</button></td>', lastPay);
+        '<td class="c-num c-bal"><button type="button" class="mini" data-act="add">Ekle</button></td>');
     }
     for (var i = entries.length + 1; i < 6; i++) {
       html += '<tr aria-hidden="true"><td class="c-date"></td><td class="c-desc"></td><td class="c-num"></td><td class="c-num"></td><td class="c-num c-bal"></td></tr>';
     }
     $("dayRows").innerHTML = html;
 
-    var kalan = devir + gIn - gOut, split = cashSplit(date);
-    function splitRow(label, k) {
-      return '<tr class="split"><td class="c-date"></td><td class="lbl">' + label + '</td><td class="c-num' + (k < 0 ? " out" : "") + '" colspan="3">' + fmtTL(k) + "</td></tr>";
-    }
+    var kalan = devir + gIn - gOut;
     $("dayFoot").innerHTML =
       '<tr class="sum"><td class="c-date"></td><td class="lbl">Günün toplamı</td><td class="c-num in">' + fmt(gIn) + '</td><td class="c-num out">' + fmt(gOut) + '</td><td class="c-num c-bal"></td></tr>' +
-      splitRow("Kasadaki nakit", split.nakit) + splitRow("Kart / banka", split.kart) +
       '<tr class="kalan"><td class="c-date"></td><td class="lbl">Kalan bakiye<br><span class="formula" style="font-weight:400;text-transform:none;letter-spacing:0">Devir + Gelir − Gider</span></td>' +
       '<td class="c-num" colspan="3"><span class="amount' + (kalan < 0 ? " neg" : "") + '">' + fmtTL(kalan) + "</span></td></tr>";
     $("carryNote").textContent = "Ertesi güne devir: " + fmtTL(kalan);
+    $("acctPrint").textContent = "Hesap: " + payLabel(account);
+    renderSwitch();
     renderNotes();
   }
 
@@ -800,12 +778,12 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     sel.value = mKeys.indexOf(prev) >= 0 ? prev : "";
     var filter = sel.value;
 
-    $("sumPeriod").textContent = filter ? monthLabel(filter) : "Tüm kayıtlar";
+    $("sumPeriod").textContent = payLabel(account) + " · " + (filter ? monthLabel(filter) : "Tüm kayıtlar");
     var list = days.filter(function (d) { return !filter || d.slice(0, 7) === filter; });
     $("sumSplit").textContent = "";
     if (list.length) {
       var endSplit = cashSplit(list[list.length - 1]);
-      $("sumSplit").textContent = "Dönem sonu: Kasadaki nakit " + fmtTL(endSplit.nakit) + " · Kart / banka " + fmtTL(endSplit.kart);
+      $("sumSplit").textContent = "Dönem sonu: Nakit Kasa " + fmtTL(endSplit.nakit) + " · Banka " + fmtTL(endSplit.kart) + " · Toplam " + fmtTL(endSplit.nakit + endSplit.kart);
     }
     if (!list.length) {
       $("sumRows").innerHTML = '<tr><td colspan="5" class="empty">Henüz kayıt yok. Günlük Sayfa’dan ilk kaydınızı ekleyin.</td></tr>';
@@ -815,7 +793,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     var totIn = 0, totOut = 0, firstDevir = null, lastKalan = 0, html = "";
     list.forEach(function (d) {
       var devir = devirFor(d), gin = 0, gout = 0;
-      state.entries.forEach(function (e) { if (e.date === d) { gin += e.gelir; gout += e.gider; } });
+      state.entries.forEach(function (e) { if (inAccount(e) && e.date === d) { gin += e.gelir; gout += e.gider; } });
       var kalan = devir + gin - gout;
       if (firstDevir === null) firstDevir = devir;
       totIn += gin; totOut += gout; lastKalan = kalan;
@@ -828,17 +806,38 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       '</td><td class="c-num out">' + fmt(totOut) + '</td><td class="c-num"><span class="amount' + (lastKalan < 0 ? " neg" : "") + '" style="font:600 1rem var(--font-num);border-bottom:4px double currentColor">' + fmt(lastKalan) + "</span></td></tr>";
   }
 
+  function renderSwitch() {
+    var s = cashSplit(current);
+    $("acctNakit").textContent = fmtTL(s.nakit);
+    $("acctKart").textContent = fmtTL(s.kart);
+    document.querySelectorAll("#acctSwitch button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-acct") === account));
+    });
+  }
   function renderSettings() {
     $("openingInput").value = fmt(state.opening);
+    $("openingBankInput").value = fmt(state.openingBanka);
   }
   function renderAll() {
     $("sampleBanner").hidden = !state.sample;
-    $("openingPrompt").hidden = state.entries.length > 0 || state.opening !== 0;
+    $("openingPrompt").hidden = state.entries.some(inAccount) || openingOf(account) !== 0;
+    $("openingQuickLabel").textContent = payLabel(account) + " (₺)";
     renderDay(); renderSummary(); renderSettings();
   }
 
+  /* ---------- hesap değiştirme ---------- */
+  $("acctSwitch").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-acct]");
+    if (!b || b.getAttribute("data-acct") === account) return;
+    flushRows();
+    account = b.getAttribute("data-acct");
+    lsSet(ACCT_KEY, account);
+    stopEdit(); renderAll();
+  });
+
   /* ---------- sekmeler ---------- */
   function showView(id) {
+    $("acctSwitch").hidden = id === "viewSettings";
     document.querySelectorAll(".tabs button").forEach(function (b) {
       var on = b.getAttribute("data-view") === id;
       b.setAttribute("aria-selected", on ? "true" : "false");
@@ -883,7 +882,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     if (isNaN(gin) || isNaN(gout)) return { err: "Tutarı rakamla yazın, örneğin 1.250,50", field: isNaN(gin) ? "gelir" : "gider" };
     if (gin < 0 || gout < 0) return { err: "Tutar eksi olamaz. Para çıkışı için Gider sütununu kullanın.", field: gin < 0 ? "gelir" : "gider" };
     if (!gin && !gout) return { err: "Gelir ya da gider tutarından birini yazın.", field: "gelir" };
-    return { desc: desc, gelir: gin, gider: gout, odeme: v.odeme === "kart" ? "kart" : "nakit" };
+    return { desc: desc, gelir: gin, gider: gout, odeme: account };
   }
   function isBlank(v) { return !String(v.desc || "").trim() && !String(v.gelir || "").trim() && !String(v.gider || "").trim(); }
   function addEntry(r, date) {
@@ -896,7 +895,6 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     var v = {}, tr = groupRow(g);
     if (tr) {
       tr.querySelectorAll("input.cell").forEach(function (i) { v[i.getAttribute("data-f")] = i.value; });
-      v.odeme = tr.querySelector(".pay-pick").getAttribute("data-pay");
     }
     return v;
   }
@@ -922,7 +920,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       return;
     }
     var e = state.entries.find(function (x) { return x.id === id; });
-    if (e) { e.desc = r.desc; e.gelir = r.gelir; e.gider = r.gider; e.odeme = r.odeme; }
+    if (e) { e.desc = r.desc; e.gelir = r.gelir; e.gider = r.gider; }
     save(); stopEdit(); renderAll(); toast("Kayıt düzeltildi");
   }
   // Gün değişmeden önce satırda yarım kalan yazıyı kaydeder (geçerliyse)
@@ -948,12 +946,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     var b = e.target.closest("button[data-act]");
     if (b) {
       var act = b.getAttribute("data-act");
-      if (act === "pay") {
-        var pay = b.getAttribute("data-val");
-        setPay(b.closest(".pay-pick"), pay);
-        if (b.closest("tr").getAttribute("data-group") === "new") lastPay = pay;
-      }
-      else if (act === "add") commitNew(groupValues("new"), current, false);
+      if (act === "add") commitNew(groupValues("new"), current, false);
       else if (act === "save") commitEdit(groupValues("edit"), editingId, false);
       else if (act === "cancel") { stopEdit(); renderDay(); }
       else if (act === "delete") confirmTap(b, "Emin misiniz? Tekrar dokunun", function () {
@@ -1002,20 +995,6 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     }, 0);
   });
 
-  $("entryPay").addEventListener("click", function (e) {
-    var b = e.target.closest(".pay-btn");
-    if (b) setPay($("entryPay"), b.getAttribute("data-val"));
-  });
-  // Sayfanın altındaki kutularla kayıt ekleme
-  $("entryForm").addEventListener("submit", function (ev) {
-    ev.preventDefault();
-    var v = { desc: $("entryDesc").value, gelir: $("entryIn").value, gider: $("entryOut").value, odeme: $("entryPay").getAttribute("data-pay") };
-    var r = readEntry(v);
-    if (r.err) { toast(r.err); $({ desc: "entryDesc", gelir: "entryIn", gider: "entryOut" }[r.field]).focus(); return; }
-    addEntry(r, current); $("entryForm").reset(); renderAll(); toast("Deftere yazıldı");
-    $("entryDesc").focus();
-  });
-
   /* ---------- ayarlar ---------- */
   $("clearSample").addEventListener("click", function () {
     state = emptyState(); save(); current = todayISO(); stopEdit(); renderAll(); toast("Defteriniz hazır. İlk kaydı boş satıra yazın.");
@@ -1024,17 +1003,20 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   $("saveOpening").addEventListener("click", function () {
     var v = parseAmount($("openingInput").value);
     if (isNaN(v)) { toast("Tutarı rakamla yazın, örneğin 2.500,00"); return; }
-    state.opening = v; save(); renderAll(); toast("Açılış bakiyesi kaydedildi");
+    var vb = parseAmount($("openingBankInput").value);
+    if (isNaN(vb)) { toast("Tutarı rakamla yazın, örneğin 2.500,00"); return; }
+    state.opening = v; state.openingBanka = vb; save(); renderAll(); toast("Açılış bakiyeleri kaydedildi");
   });
 
   $("saveOpeningQuick").addEventListener("click", function () {
     var v = parseAmount($("openingQuick").value);
     if (isNaN(v)) { toast("Tutarı rakamla yazın, örneğin 2.500,00"); return; }
-    state.opening = v; save(); renderAll(); toast("Kasadaki para devir olarak yazıldı");
+    if (account === "kart") state.openingBanka = v; else state.opening = v;
+    save(); renderAll(); toast("Tutar devir olarak yazıldı");
     focusCell("new", "desc");
   });
 
-  function backupJSON() { return JSON.stringify({ app: "kasa-defteri", version: 1, saved: new Date().toISOString(), opening: state.opening, entries: state.entries, not: $("stickyNote").value }, null, 1); }
+  function backupJSON() { return JSON.stringify({ app: "kasa-defteri", version: 1, saved: new Date().toISOString(), opening: state.opening, openingBanka: state.openingBanka, entries: state.entries, not: $("stickyNote").value }, null, 1); }
   function download(name, text, mime) {
     try {
       var blob = new Blob(["﻿" + text], { type: mime });
@@ -1055,10 +1037,11 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   });
   $("downloadBackup").addEventListener("click", function () { download("kasa-defteri-yedek-" + todayISO() + ".json", backupJSON(), "application/json"); });
   $("downloadCsv").addEventListener("click", function () {
-    var bal = state.opening, lines = ["Tarih;Açıklama;Ödeme;Gelir;Gider;Bakiye", ";Açılış bakiyesi;Nakit;;;" + fmt(bal)];
+    var bal = { nakit: state.opening, kart: state.openingBanka };
+    var lines = ["Tarih;Açıklama;Hesap;Gelir;Gider;Bakiye", ";Açılış bakiyesi;Nakit Kasa;;;" + fmt(bal.nakit), ";Açılış bakiyesi;Banka;;;" + fmt(bal.kart)];
     sorted().forEach(function (e) {
-      bal += e.gelir - e.gider;
-      lines.push([shortDate(e.date), '"' + e.desc.replace(/"/g, '""') + '"', payLabel(e.odeme), e.gelir ? fmt(e.gelir) : "", e.gider ? fmt(e.gider) : "", fmt(bal)].join(";"));
+      bal[e.odeme] += e.gelir - e.gider;
+      lines.push([shortDate(e.date), '"' + e.desc.replace(/"/g, '""') + '"', payLabel(e.odeme), e.gelir ? fmt(e.gelir) : "", e.gider ? fmt(e.gider) : "", fmt(bal[e.odeme])].join(";"));
     });
     download("kasa-defteri-" + todayISO() + ".csv", lines.join("\r\n"), "text/csv;charset=utf-8");
   });
@@ -1280,8 +1263,8 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     el.innerHTML = FX_ITEMS.map(function (it) {
       var v = data.items[it[0]]; if (!v) return "";
       var c = v.change, cls = c > 0 ? "up" : c < 0 ? "down" : "";
-      return "<span>" + it[1] + '</span><span class="val">' + fmt(v.sell) + ' ₺</span><span class="chg ' + cls + '">' +
-        (c > 0 ? "▲" : c < 0 ? "▼" : "") + " %" + nf.format(Math.abs(c)) + "</span>";
+      return '<span class="fx-item"><span>' + it[1].replace(" altın", '<span class="lg"> altın</span>') + '</span><span class="val">' + fmt(v.sell) + ' ₺</span><span class="chg ' + cls + '">' +
+        (c > 0 ? "▲" : c < 0 ? "▼" : "") + " %" + nf.format(Math.abs(c)) + "</span></span>";
     }).join("") + '<span class="when">Satış fiyatı, ' + esc(data.when) + "</span>";
   }
   function fetchFx() {
@@ -1495,9 +1478,9 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     });
     window.print();
   }
-  $("printDay").addEventListener("click", function () { printAs("Kasa Defteri " + shortDate(current)); });
+  $("printDay").addEventListener("click", function () { printAs("Kasa Defteri " + payLabel(account) + " " + shortDate(current)); });
   $("printSummary").addEventListener("click", function () {
-    printAs("Kasa Defteri Ozeti " + ($("monthFilter").value ? monthLabel($("monthFilter").value) : "Tum kayitlar"));
+    printAs("Kasa Defteri Ozeti " + payLabel(account) + " " + ($("monthFilter").value ? monthLabel($("monthFilter").value) : "Tum kayitlar"));
   });
   if (inFrame) document.querySelectorAll(".print-btn").forEach(function (b) { b.hidden = true; });
 
@@ -1581,6 +1564,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   tick(); setInterval(tick, 1000);
 
   /* ---------- başlat ---------- */
+  account = lsGet(ACCT_KEY) === "kart" ? "kart" : "nakit";
   state = load();
   if (!state) { state = sampleState(); save(); }
   document.getElementById("storageBanner").hidden = storageOk;
