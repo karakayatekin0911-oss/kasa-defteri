@@ -113,17 +113,12 @@ button { cursor: pointer; }
 .clock-line { display: flex; align-items: baseline; gap: 14px; }
 .clock { font: 700 1.4rem var(--font-ui); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 
-/* Kronometre: ekranın alt ortasında küçük, hep görünen düğme */
+/* Kronometre: Kasa Defteri yazısının yanında sabit */
+.brand { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; min-width: 0; }
 .stopwatch {
-  position: fixed; left: 50%; transform: translateX(-50%); z-index: 20;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   display: flex; align-items: center; gap: 4px;
-  background: var(--paper); border: 1.5px solid var(--ink); border-radius: 999px;
-  padding: 3px; box-shadow: 0 6px 18px var(--shadow);
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: 999px; padding: 2px;
 }
-.stopwatch { touch-action: none; user-select: none; cursor: grab; }
-.stopwatch.dragging { cursor: grabbing; opacity: .9; }
-.sw-grip { color: var(--ink-soft); padding-left: 8px; font-size: 1rem; line-height: 1; }
 .sw-main {
   border: 0; background: transparent; color: var(--ink); border-radius: 999px;
   padding: 5px 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: .85rem;
@@ -139,7 +134,6 @@ button { cursor: pointer; }
   .stopwatch.running .sw-dot { animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .35; } }
 }
-.app { padding-bottom: 84px; }
 
 /* Hava durumu ve namaz vakti: sayfanın köşesine iliştirilmiş not */
 .info {
@@ -359,7 +353,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
 
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(68px + env(safe-area-inset-bottom, 0px)); z-index: 21;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 21;
   background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 8px;
   font-weight: 700; font-size: .92rem; box-shadow: 0 6px 20px var(--shadow); max-width: calc(100% - 32px);
 }
@@ -426,13 +420,59 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   .ledger tfoot tr.kalan .amount { font-size: 1.2rem; }
   .ledger tfoot .lbl { font-size: .72rem; }
 }
+/* Son düzen: hava tarihin yanında, başlık ile hesaplar arası dar, not yeşil zeminde */
+.app { padding-block: 10px 28px; gap: 8px; }
+.top { align-items: center; gap: 6px 16px; }
+.top h1 { font-size: 2.1rem; }
+.top h1 small { margin-top: 2px; }
+.tabs { margin-bottom: 0; align-self: center; }
+.tabs button { padding: 7px 12px; border-radius: 8px; }
+.date-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.date-row .wx-box { display: contents; }
+.date-row .wx { margin: 0; cursor: pointer; white-space: nowrap; }
+#changeCity { display: none; } /* şehri değiştirmek için hava durumuna dokunulur */
+#viewDay .date-row .day-title { order: 0; }
+#viewDay .date-row .wx { order: 1; }
+#viewDay .date-row .city-picker { order: 2; }
+@media (min-width: 700px) { .date-row { flex-wrap: wrap; } .date-row .day-title { font-size: 1.4rem; } }
+.date-row .city-picker { flex: 1 0 100%; }
+.wx-now { margin-top: 0; cursor: pointer; }
+.fx-extra { border: 1px solid var(--rule); background: var(--field); border-radius: 5px; padding: 2px 4px; font-size: .78rem; width: 100%; min-width: 0; }
+.sticky { background: #d8f3d0; border-color: #a9d79c; color: #1f3d2b; }
+.sticky label, .sticky textarea { color: #1f3d2b; }
+.sticky textarea { color-scheme: light; }
+.sticky textarea::placeholder { color: #3d6a4c; opacity: .8; }
+@media (max-width: 560px) {
+  .top h1 { font-size: 1.55rem; white-space: nowrap; }
+  .top h1 small { display: none; }
+  .brand { flex-wrap: nowrap; gap: 8px; width: 100%; justify-content: space-between; }
+  .sw-main { padding: 3px 8px; gap: 5px; font-size: .74rem; }
+  .sw-main .sw-time { font-size: .84rem; }
+  .sw-reset { padding: 3px 7px; font-size: .66rem; }
+  .tabs { width: 100%; }
+  .tabs button { flex: 1 1 0; padding: 5px 4px; font-size: .82rem; }
+  #viewDay .date-row { order: 1; flex-wrap: wrap; justify-content: space-between; }
+  .date-row .wx-box .city, #changeCity, .wx-desc { display: none; }
+  .wx-now { margin: 0; }
+  .fx-extra { font-size: .72rem; }
+}
 </style>
 
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <h1>Kasa Defteri<small>Günlük gelir–gider kaydı, gün sonu bakiye ve devir</small></h1>
+    <div class="brand">
+      <h1>Kasa Defteri<small>Günlük gelir–gider kaydı, gün sonu bakiye ve devir</small></h1>
+      <div class="stopwatch" id="stopwatch">
+        <button type="button" class="sw-main" id="swMain" aria-label="Kronometre">
+          <span class="sw-dot" aria-hidden="true"></span>
+          <span class="sw-time" id="swTime">00:00:00</span>
+          <span id="swLabel">Başlat</span>
+        </button>
+        <button type="button" class="sw-reset" id="swReset" hidden>Sıfırla</button>
+      </div>
+    </div>
     <nav class="tabs" role="tablist" aria-label="Bölümler">
       <button type="button" role="tab" id="tabDay" aria-selected="true" data-view="viewDay">Günlük Sayfa</button>
       <button type="button" role="tab" id="tabSummary" aria-selected="false" data-view="viewSummary">Defter Özeti</button>
@@ -461,7 +501,19 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   <section id="viewDay" class="paper" role="tabpanel" aria-labelledby="tabDay">
     <div class="sheet-head">
       <div class="title-wrap">
-        <h2 class="day-title" id="dayTitle">—</h2>
+        <div class="date-row">
+          <h2 class="day-title" id="dayTitle">—</h2>
+          <div class="wx-box" id="wxBox">
+            <div class="wx" id="wxLine">Hava durumu yükleniyor…</div>
+            <form class="city-picker" id="cityPicker" hidden>
+              <div class="row">
+                <input id="cityInput" autocomplete="off" placeholder="Şehir ya da ilçe, örn. İzmir" aria-label="Şehir ya da ilçe">
+                <button type="submit" class="btn primary">Ara</button>
+              </div>
+              <div class="city-results" id="cityResults"></div>
+            </form>
+          </div>
+        </div>
         <div class="clock-line"><span class="clock" id="clock" aria-label="Şu anki saat">--:--:--</span><span class="page-no" id="pageNo"></span></div>
         <p class="print-only" id="acctPrint"></p>
         <section class="pray-box" id="prayLine" aria-label="Namaz vakitleri" hidden>
@@ -473,18 +525,9 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
         </section>
       </div>
       <div class="side-col">
-      <aside class="info" id="infoBox" aria-live="polite">
-        <div class="wx-box" id="wxBox">
-          <div class="wx" id="wxLine">Hava durumu yükleniyor…</div>
-          <form class="city-picker" id="cityPicker" hidden>
-            <div class="row">
-              <input id="cityInput" autocomplete="off" placeholder="Şehir ya da ilçe, örn. İzmir" aria-label="Şehir ya da ilçe">
-              <button type="submit" class="btn primary">Ara</button>
-            </div>
-            <div class="city-results" id="cityResults"></div>
-          </form>
-        </div>
+      <aside class="info" id="infoBox" aria-live="polite" hidden>
         <div class="fx" id="fxLine" hidden></div>
+        <select class="fx-extra" id="fxExtra" aria-label="Eklenecek para birimi"><option value="">+ Para birimi ekle</option></select>
       </aside>
       <div class="sticky">
         <label for="stickyNote">Notlarım</label>
@@ -557,7 +600,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       </label>
       <label class="toggle" for="showFx">
         <input type="checkbox" id="showFx" checked>
-        <span>Döviz ve altın fiyatlarını göster <small>(dolar, euro, gram ve çeyrek altın)</small></span>
+        <span>Döviz ve altın fiyatlarını göster <small>(dolar, euro, gram, çeyrek, yarım, tam altın)</small></span>
       </label>
       <label class="toggle" for="notifyDue">
         <input type="checkbox" id="notifyDue" checked>
@@ -596,15 +639,6 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
 
   <div class="toast" id="toast" role="status" hidden></div>
 
-  <div class="stopwatch" id="stopwatch" title="Taşımak için basılı tutup sürükleyin">
-    <span class="sw-grip" aria-hidden="true">⠿</span>
-    <button type="button" class="sw-main" id="swMain" aria-label="Kronometre">
-      <span class="sw-dot" aria-hidden="true"></span>
-      <span class="sw-time" id="swTime">00:00:00</span>
-      <span id="swLabel">Başlat</span>
-    </button>
-    <button type="button" class="sw-reset" id="swReset" hidden>Sıfırla</button>
-  </div>
 </div>
 
 <script>
@@ -1145,11 +1179,11 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       line.innerHTML = "<b>Şehrinizi seçin</b> <span class=\"muted\">hava durumu ve namaz vakti için</span>";
       $("cityPicker").hidden = false; return;
     }
-    var head = "<b>" + esc(cityLabel(loc)) + '</b> <button type="button" class="link" id="changeCity">değiştir</button>';
+    var head = '<b class="city">' + esc(cityLabel(loc)) + '</b> <button type="button" class="link" id="changeCity">değiştir</button>';
     if (!weather) { line.innerHTML = head + '<br><span class="muted">' + (weather === false ? "Hava durumu alınamadı (internet bağlantısı?)" : "Hava durumu yükleniyor…") + "</span>"; return; }
     var w = wxInfo(weather.code);
-    line.innerHTML = head + '<br><span class="wx-now ' + wxClass(weather.code) + '"><span class="sym" aria-hidden="true">' + w[1] + '</span> <span class="temp">' +
-      Math.round(weather.temp) + "°C</span> " + esc(w[2]) + "</span>";
+    line.innerHTML = head + ' <span class="wx-now ' + wxClass(weather.code) + '"><span class="sym" aria-hidden="true">' + w[1] + '</span> <span class="temp">' +
+      Math.round(weather.temp) + "°C</span> <span class=\"wx-desc\">" + esc(w[2]) + "</span></span>";
   }
   function fetchWeather() {
     if (!loc || inFrame) return;
@@ -1260,7 +1294,7 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   });
 
   $("wxBox").addEventListener("click", function (e) {
-    if (e.target.id === "changeCity") { $("cityPicker").hidden = !$("cityPicker").hidden; $("cityInput").focus(); return; }
+    if (loc && e.target.closest(".wx")) { $("cityPicker").hidden = !$("cityPicker").hidden; $("cityInput").focus(); return; }
     var b = e.target.closest(".city-results button"); if (!b) return;
     loc = JSON.parse(b.getAttribute("data-loc")); lsSet(LOC_KEY, loc);
     $("cityPicker").hidden = true; $("cityResults").innerHTML = ""; weather = null;
@@ -1290,29 +1324,54 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
 
   // Döviz ve altın: Truncgil Finans (anahtar istemez). Son fiyat saklanır; internet yoksa onun saati ile gösterilir.
   var FX_KEY = "kasaDefteri.kurlar";
-  var FX_ITEMS = [["USD", "Dolar"], ["EUR", "Euro"], ["GRA", "Gram altın"], ["CEYREKALTIN", "Çeyrek altın"]];
+  var FX_MONEY = [["USD", "Dolar"], ["EUR", "Euro"]];
+  var FX_GOLD = [["GRA", "Gram altın"], ["CEYREKALTIN", "Çeyrek altın"], ["YARIMALTIN", "Yarım altın"], ["TAMALTIN", "Tam altın"]];
+  var FX_NAMES = { GBP: "İngiliz Sterlini", CHF: "İsviçre Frangı", SAR: "Suudi Riyali", JPY: "Japon Yeni", CAD: "Kanada Doları", AUD: "Avustralya Doları",
+    RUB: "Rus Rublesi", AED: "BAE Dirhemi", KWD: "Kuveyt Dinarı", QAR: "Katar Riyali", SEK: "İsveç Kronu", NOK: "Norveç Kronu", DKK: "Danimarka Kronu",
+    CNY: "Çin Yuanı", AZN: "Azerbaycan Manatı", IQD: "Irak Dinarı", IRR: "İran Riyali", BGN: "Bulgar Levası", RON: "Romen Leyi", GEL: "Gürcü Larisi" };
+  function fxName(code) { return FX_NAMES[code] || code; }
   function renderFx(data) {
     var el = $("fxLine");
-    if (inFrame || !prefs.kur) { el.hidden = true; return; }
-    el.hidden = false;
+    if (inFrame || !prefs.kur) { el.hidden = true; $("infoBox").hidden = true; return; }
+    el.hidden = false; $("infoBox").hidden = false;
+    $("fxExtra").hidden = !data;
     if (!data) { el.innerHTML = '<span class="muted" style="grid-column:1/-1">Fiyatlar alınamadı (internet bağlantısı?)</span>'; return; }
-    el.innerHTML = FX_ITEMS.map(function (it) {
+    var extra = prefs.kurEk && data.items[prefs.kurEk] ? [[prefs.kurEk, fxName(prefs.kurEk)]] : [];
+    fillFxExtra(data);
+    el.innerHTML = FX_MONEY.concat(extra, FX_GOLD).map(function (it) {
       var v = data.items[it[0]]; if (!v) return "";
       var c = v.change, cls = c > 0 ? "up" : c < 0 ? "down" : "";
       return '<span class="fx-item"><span>' + it[1].replace(" altın", '<span class="lg"> altın</span>') + '</span><span class="val">' + fmt(v.sell) + ' ₺</span><span class="chg ' + cls + '">' +
         (c > 0 ? "▲" : c < 0 ? "▼" : "") + " %" + nf.format(Math.abs(c)) + "</span></span>";
     }).join("") + '<span class="when">Satış fiyatı, ' + esc(data.when) + "</span>";
   }
+  function fillFxExtra(data) {
+    var sel = $("fxExtra"), codes = data.codes || [];
+    sel.innerHTML = '<option value="">' + (prefs.kurEk ? "Eklenen para birimini kaldır" : "+ Para birimi ekle") + "</option>" + codes.map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(fxName(c)) + "</option>";
+    }).join("");
+    sel.value = prefs.kurEk || "";
+  }
+  $("fxExtra").addEventListener("change", function (e) {
+    prefs.kurEk = e.target.value; lsSet(PREFS_KEY, prefs); renderFx(lsGet(FX_KEY));
+  });
   function fetchFx() {
     if (inFrame || !prefs.kur) { renderFx(null); return; }
     getJSON("https://finans.truncgil.com/v4/today.json").then(function (j) {
       var items = {};
-      FX_ITEMS.forEach(function (it) {
-        var v = j[it[0]];
-        if (v && isFinite(v.Selling)) items[it[0]] = { sell: Math.round(+v.Selling * 100), change: +v.Change || 0 };
+      function take(code) {
+        var v = j[code];
+        if (v && isFinite(v.Selling)) items[code] = { sell: Math.round(+v.Selling * 100), change: +v.Change || 0 };
+      }
+      FX_GOLD.forEach(function (it) { take(it[0]); });
+      // Bütün dövizler: biri ek para birimi olarak seçilebilsin
+      var codes = Object.keys(j).filter(function (k) { return j[k] && j[k].Type === "Currency"; });
+      codes.forEach(take);
+      codes = codes.filter(function (c) { return c !== "USD" && c !== "EUR"; }).sort(function (a, b) {
+        return fxName(a).localeCompare(fxName(b), "tr");
       });
       var u = String(j.Update_Date || ""), m = u.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2})/);
-      var data = { items: items, when: m ? m[3] + "." + m[2] + "." + m[1] + " " + m[4] : u };
+      var data = { items: items, codes: codes, when: m ? m[3] + "." + m[2] + "." + m[1] + " " + m[4] : u };
       lsSet(FX_KEY, data); renderFx(data);
     }).catch(function () { renderFx(lsGet(FX_KEY)); });
   }
@@ -1548,51 +1607,6 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
       sw = { running: false, startedAt: 0, acc: 0 }; lsSet(SW_KEY, sw); renderStopwatch();
     });
   });
-  // Kronometreyi sürükleyerek taşıma; yeri hatırlanır. Küçük hareket tıklama sayılır.
-  var SW_POS_KEY = "kasaDefteri.kronometreYeri";
-  function placeStopwatch(x, y) {
-    var el = $("stopwatch"), r = el.getBoundingClientRect();
-    x = Math.max(0, Math.min(x, window.innerWidth - r.width));
-    y = Math.max(0, Math.min(y, window.innerHeight - r.height));
-    el.style.left = x + "px"; el.style.top = y + "px"; el.style.bottom = "auto"; el.style.transform = "none";
-    return { x: x, y: y };
-  }
-  (function () {
-    var el = $("stopwatch"), start = null, moved = false, skipClick = false;
-    el.addEventListener("pointerdown", function (e) {
-      var r = el.getBoundingClientRect();
-      start = { px: e.clientX, py: e.clientY, x: r.left, y: r.top, id: e.pointerId };
-      moved = false;
-    });
-    // Pencereden izlenir: hızlı sürüklemede imleç kronometreden çıksa da takip kopmaz
-    window.addEventListener("pointermove", function (e) {
-      if (!start || e.pointerId !== start.id) return;
-      var dx = e.clientX - start.px, dy = e.clientY - start.py;
-      if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return;
-      if (!moved) { moved = true; el.classList.add("dragging"); }
-      placeStopwatch(start.x + dx, start.y + dy);
-    });
-    function end(e) {
-      if (!start || e.pointerId !== start.id) return;
-      if (moved) {
-        var r = el.getBoundingClientRect();
-        lsSet(SW_POS_KEY, { x: r.left, y: r.top });
-        el.classList.remove("dragging"); skipClick = true;
-        setTimeout(function () { skipClick = false; }, 0);
-      }
-      start = null;
-    }
-    window.addEventListener("pointerup", end);
-    window.addEventListener("pointercancel", end);
-    // Sürükleme bitince düğmeye basılmış sayılmasın
-    el.addEventListener("click", function (e) { if (skipClick) { e.stopPropagation(); e.preventDefault(); skipClick = false; } }, true);
-    var saved = lsGet(SW_POS_KEY);
-    if (saved) placeStopwatch(saved.x, saved.y);
-    window.addEventListener("resize", function () {
-      var p = lsGet(SW_POS_KEY);
-      if (p) placeStopwatch(p.x, p.y);
-    });
-  })();
   function tick() {
     $("clock").textContent = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     renderStopwatch();
