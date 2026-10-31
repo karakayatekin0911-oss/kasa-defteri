@@ -463,12 +463,12 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
 .wx-rain { --wx-bg: #1e78d6; --wx-fg: #ffffff; }
 .wx-snow { --wx-bg: #bdeaf7; --wx-fg: #0b3a48; }
 .wx-storm { --wx-bg: #6f42c1; --wx-fg: #ffffff; }
-.fx-remove { border: 0; background: var(--tab); color: var(--ink); border-radius: 4px; padding: 0 5px; font-weight: 700; line-height: 1.3; }
+.fx-added .fx-extra { width: 7.6em; max-width: 100%; }
 .info .fx .fx-extra { grid-column: 1 / -1; }
 @media (max-width: 560px) {
   .info .fx .fx-extra { grid-column: auto; padding: 1px 2px; }
-  .fx-added { flex-wrap: wrap; white-space: normal; gap: 0 4px; }
-  .fx-added .fx-name { font-size: .72rem; line-height: 1.15; }
+  .fx-added .fx-name { flex: 1 1 0; min-width: 0; }
+  .fx-added .fx-extra { width: 100%; font-size: .68rem; padding: 1px 0; }
 }
 </style>
 
@@ -1354,18 +1354,38 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     BGN: "Bulgaristan Levası", VND: "Vietnam Dongu"
   };
   function fxName(code) { return FX_NAMES[code] || code; }
+  // Kutuda görünen kısa adlar (listede tam ad yazar)
+  var FX_SHORT = {
+    GBP: "İng. Sterlin", CHF: "İsv. Frank", CAD: "Kanada Dlr", RUB: "Rus Ruble", AED: "BAE Dirhem", AUD: "Avust. Dlr", DKK: "Dan. Kron", SEK: "İsveç Kron",
+    NOK: "Norveç Kron", JPY: "Japon Yen", KWD: "Kuveyt Dnr", ZAR: "G.Afrika Rnd", BHD: "Bahreyn Dnr", LYD: "Libya Dnr", SAR: "Suudi Riyal", IQD: "Irak Dnr",
+    ILS: "İsrail Şekel", INR: "Hint Rupi", MXN: "Meksika Pes", HUF: "Macar Forint", NZD: "Y.Zelanda Dlr", BRL: "Brezilya Rl", IDR: "Endnz. Rph", CZK: "Çek Koruna",
+    PLN: "Polonya Zlt", RON: "Romen Ley", CNY: "Çin Yuan", ARS: "Arjantin Pes", ALL: "Arnavut Lek", AZN: "Azeri Manat", BAM: "Bosna Mark", CLP: "Şili Peso",
+    COP: "Kolombiya Pes", CRC: "Kosta R. Kol", DZD: "Cezayir Dnr", EGP: "Mısır Lira", HKD: "H.Kong Dlr", ISK: "İzlanda Kron", KRW: "G.Kore Won", KZT: "Kazak Tenge",
+    LBP: "Lübnan Lira", LKR: "Sri L. Rupi", MAD: "Fas Dirhem", MDL: "Moldova Ley", MKD: "Makedon Dnr", MYR: "Malezya Rng", OMR: "Umman Riyal", PEN: "Peru Sol",
+    PHP: "Filipin Peso", PKR: "Pakistan Rp", QAR: "Katar Riyal", RSD: "Sırp Dinar", SGD: "Singapur Dlr", SYP: "Suriye Lira", THB: "Tayland Baht", TWD: "Tayvan Dlr",
+    UAH: "Ukrayna Grv", UYU: "Uruguay Pes", GEL: "Gürcü Lari", TND: "Tunus Dnr", BGN: "Bulgar Leva", VND: "Vietnam Dng"
+  };
   // Küçük kurlar (Japonya Yeni gibi) 0,00 görünmesin diye gereken kadar ondalık gösterilir
   function fxFmt(n) {
     var d = n >= 1 ? 2 : n >= 0.01 ? 4 : 6;
     return n.toLocaleString("tr-TR", { minimumFractionDigits: d, maximumFractionDigits: d });
   }
-  function fxItem(code, label, v, removable) {
-    if (!v) return "";
+  function fxTail(v) {
     var c = v.change, cls = c > 0 ? "up" : c < 0 ? "down" : "";
-    return '<span class="fx-item' + (removable ? " fx-added" : "") + '"><span class="fx-name">' + label.replace(" altın", '<span class="lg"> altın</span>') +
-      (removable ? ' <button type="button" class="fx-remove" id="fxRemove" aria-label="Eklenen para birimini kaldır" title="Kaldır">×</button>' : "") +
-      '</span><span class="val">' + fxFmt(v.sell) + ' ₺</span><span class="chg ' + cls + '">' +
-      (c > 0 ? "▲" : c < 0 ? "▼" : "") + " %" + nf.format(Math.abs(c)) + "</span></span>";
+    return '<span class="val">' + fxFmt(v.sell) + ' ₺</span><span class="chg ' + cls + '">' +
+      (c > 0 ? "▲" : c < 0 ? "▼" : "") + " %" + nf.format(Math.abs(c)) + "</span>";
+  }
+  function fxItem(label, v) {
+    if (!v) return "";
+    return '<span class="fx-item"><span class="fx-name">' + label.replace(" altın", '<span class="lg"> altın</span>') + "</span>" + fxTail(v) + "</span>";
+  }
+  // Para birimi seçimi hep yerinde durur: seçilince kısa adı ve kuru görünür, dokununca değiştirilir
+  function fxSlot(data, added) {
+    var opts = '<option value="">' + (added ? "Kaldır" : "+ Para birimi ekle") + "</option>" + (data.codes || []).map(function (c) {
+      return '<option value="' + esc(c) + '"' + (c === added ? " selected" : "") + ">" + esc(c === added ? (FX_SHORT[c] || c) : fxName(c)) + "</option>";
+    }).join("");
+    var sel = '<select class="fx-extra" id="fxExtra" aria-label="Eklenen para birimi">' + opts + "</select>";
+    return added ? '<span class="fx-item fx-added"><span class="fx-name">' + sel + "</span>" + fxTail(data.items[added]) + "</span>" : sel;
   }
   function renderFx(data) {
     var el = $("fxLine");
@@ -1373,19 +1393,13 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
     el.hidden = false; $("infoBox").hidden = false;
     if (!data) { el.innerHTML = '<span class="muted" style="grid-column:1/-1">Fiyatlar alınamadı (internet bağlantısı?)</span>'; return; }
     var added = prefs.kurEk && data.items[prefs.kurEk] ? prefs.kurEk : "";
-    var slot = added ? fxItem(added, fxName(added), data.items[added], true)
-      : '<select class="fx-extra" id="fxExtra" aria-label="Eklenecek para birimi"><option value="">+ Para birimi ekle</option>' +
-        (data.codes || []).map(function (c) { return '<option value="' + esc(c) + '">' + esc(fxName(c)) + "</option>"; }).join("") + "</select>";
-    function list(rows) { return rows.map(function (it) { return fxItem(it[0], it[1], data.items[it[0]]); }).join(""); }
+    var slot = fxSlot(data, added);
+    function list(rows) { return rows.map(function (it) { return fxItem(it[1], data.items[it[0]]); }).join(""); }
     el.innerHTML = list(FX_MONEY) + slot + list(FX_METAL) + '<span class="when">Satış fiyatı, ' + esc(data.when) + "</span>";
   }
   $("fxLine").addEventListener("change", function (e) {
     if (e.target.id !== "fxExtra") return;
     prefs.kurEk = e.target.value; lsSet(PREFS_KEY, prefs); renderFx(lsGet(FX_KEY));
-  });
-  $("fxLine").addEventListener("click", function (e) {
-    if (e.target.id !== "fxRemove") return;
-    prefs.kurEk = ""; lsSet(PREFS_KEY, prefs); renderFx(lsGet(FX_KEY));
   });
   function fetchFx() {
     if (inFrame || !prefs.kur) { renderFx(null); return; }
