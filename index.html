@@ -18,7 +18,7 @@
   --paper: #f7faf3;         /* pale green accounting paper */
   --rule: #b7cbe0;          /* blue ruled lines */
   --wx-sun: #b26a00; --wx-cloud: #5b6675; --wx-rain: #1565c0; --wx-snow: #0f7f9c; --wx-storm: #6a3fb5;
-  --line: #8fadd0;          /* defter satır çizgileri */
+  --line: #6f92bd;          /* defter satır çizgileri */
   --col: #5f80aa;           /* sütun ayırma çizgileri */
   --margin: #d9534f;        /* red margin line */
   --ink: #1f2f63;           /* blue ballpoint */
@@ -38,14 +38,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --desk: #0f1418; --paper: #182027; --rule: #2b3d50; --margin: #a8504c;
-    --wx-sun: #ffc247; --wx-cloud: #aab4c2; --wx-rain: #6db3ff; --wx-snow: #8fe3f5; --wx-storm: #c3a4ff; --line: #3d5672; --col: #6283a8; --ink: #cfdaf5; --ink-soft: #8d9bba; --in: #6fd19e; --out: #ff8f86;
+    --wx-sun: #ffc247; --wx-cloud: #aab4c2; --wx-rain: #6db3ff; --wx-snow: #8fe3f5; --wx-storm: #c3a4ff; --line: #557596; --col: #86a6cc; --ink: #cfdaf5; --ink-soft: #8d9bba; --in: #6fd19e; --out: #ff8f86;
     --tab: #1f2932; --field: #111820; --shadow: rgba(0, 0, 0, .45); --focus: #7aa2ff;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --desk: #0f1418; --paper: #182027; --rule: #2b3d50; --margin: #a8504c;
-  --wx-sun: #ffc247; --wx-cloud: #aab4c2; --wx-rain: #6db3ff; --wx-snow: #8fe3f5; --wx-storm: #c3a4ff; --line: #3d5672; --col: #6283a8; --ink: #cfdaf5; --ink-soft: #8d9bba; --in: #6fd19e; --out: #ff8f86;
+  --wx-sun: #ffc247; --wx-cloud: #aab4c2; --wx-rain: #6db3ff; --wx-snow: #8fe3f5; --wx-storm: #c3a4ff; --line: #557596; --col: #86a6cc; --ink: #cfdaf5; --ink-soft: #8d9bba; --in: #6fd19e; --out: #ff8f86;
   --tab: #1f2932; --field: #111820; --shadow: rgba(0, 0, 0, .45); --focus: #7aa2ff;
   color-scheme: dark;
 }
@@ -389,6 +389,42 @@ textarea { width: 100%; min-height: 96px; font: .8rem/1.4 var(--font-num); resiz
   .sticky label { font-size: .95rem; line-height: 1.1; }
   .sticky textarea { min-height: 34px; font-size: .85rem; line-height: 1.25; }
   .acct-switch button { padding: 5px 8px; font-size: .85rem; flex-direction: column; gap: 0; }
+}
+/* Defter ön planda: büyük, net yazı ve belirgin çizgiler */
+:root { --row: 48px; }
+.ledger th { background: color-mix(in srgb, var(--ink) 14%, transparent); color: var(--ink); padding-block: 9px; }
+.ledger .c-desc { font: 600 1.05rem/1.25 var(--font-ui); }
+.ledger tr.devir .c-desc { font-weight: 700; }
+.ledger .c-num { font: 600 1.02rem var(--font-num); }
+.ledger td.c-bal { font-weight: 700; }
+.ledger .c-date { font: 600 .9rem var(--font-ui); }
+.ledger input.cell { font-weight: 600; }
+@media (max-width: 560px) {
+  /* Telefonda sıra: tarih, gezinme, DEFTER; hatırlatma ve bilgi kutuları altta */
+  #viewDay { gap: 8px; padding-top: 10px; }
+  #viewDay > .sheet-head, #viewDay .title-wrap { display: contents; }
+  #viewDay .day-title { order: 1; font-size: 1.1rem; }
+  #viewDay .clock-line { order: 2; }
+  #viewDay .clock { font-size: 1rem; }
+  #viewDay > .daynav { order: 3; }
+  #viewDay > #openingPrompt { order: 4; }
+  #viewDay > .tablewrap { order: 5; }
+  #viewDay > .carry-note { order: 6; }
+  #viewDay > .hint { order: 7; }
+  #viewDay > .notes { order: 8; }
+  #viewDay .pray-box { order: 9; }
+  #viewDay .side-col { order: 10; }
+  /* Tarih üstte yazdığı için sütun açıklamaya bırakılır */
+  #dayTable .c-date { display: none; }
+  #dayTable .c-desc, #dayTable th:nth-child(2) { border-left: 3px double var(--margin); }
+  .ledger th { font-size: .68rem; }
+  .ledger th.c-num { font-size: .68rem; }
+  .ledger .c-desc { font-size: .95rem; }
+  .ledger .c-num { font-size: .84rem; }
+  .ledger td.c-num input.cell { width: 4.6em; }
+  .ledger .c-desc input.cell { font-size: 16px; } /* telefon yazarken sayfayı yakınlaştırmasın */
+  .ledger tfoot tr.kalan .amount { font-size: 1.2rem; }
+  .ledger tfoot .lbl { font-size: .72rem; }
 }
 </style>
 
